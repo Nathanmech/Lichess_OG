@@ -181,26 +181,10 @@ export function status(): Promise<void> {
     }
   })
   .then((data: ApiStatus) => {
-    // warn if buggy app
-    if (data.mustUpgrade) {
-      const key = 'warn_bug_' + v
-      const warnCount = Number(storage.get(key)) || 0
-      if (warnCount === 0) {
-        Dialog.alert({
-          title: 'Alert',
-          message: 'A new version of lichess mobile is available. Please upgrade as soon as possible.',
-        }).then(() => {
-          storage.set(key, 1)
-        })
-      }
-      else if (warnCount === 10) {
-        storage.remove(key)
-      }
-      else {
-        storage.set(key, warnCount + 1)
-      }
-    }
-    else if (data.api.current > globalConfig.apiVersion) {
+    // lichess.org now answers `mustUpgrade: true` to every version of this
+    // app, to advertise its new official app. There is no newer build of this
+    // one to upgrade to, so that flag is ignored here.
+    if (data.api.current > globalConfig.apiVersion) {
       const versionInfo = data.api.olds.find(o => o.version === globalConfig.apiVersion)
       if (versionInfo) {
         const now = new Date(),
