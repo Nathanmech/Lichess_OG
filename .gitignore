@@ -4,6 +4,7 @@ npm-debug.log
 
 /appconfig.*.json
 !/appconfig.dev.json
+!/appconfig.prod.json
 
 /app.js.map
 /*.mobileprovision

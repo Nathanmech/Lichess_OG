@@ -7,16 +7,14 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false,
   webDir: 'www',
   backgroundColor: '000000ff',
-  appendUserAgent: 'Lichobile/7.15.2',
+  // keeps the "Lichobile/" marker so lichess.org can still tell what this is
+  appendUserAgent: 'Lichobile/7.15.2-og',
   plugins: {
     SplashScreen: {
       androidSplashResourceName: 'launch_splash',
       launchAutoHide: false,
       useDialog: false,
     },
-    PushNotifications: {
-      presentationOptions: ['sound', 'alert']
-    }
   },
   ios: {
     scheme: 'lichess',
