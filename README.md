@@ -26,6 +26,12 @@ Build the Android APK (Node 22, JDK 17, Android SDK 30 + NDK 23.1.7779620):
     (cd node_modules/capacitor-stockfish/stockfish/src && make net)
     (cd android && ./gradlew assembleDebug)
 
+For a signed release APK, put the signing keystore at `android/lichess-og.keystore`
+and its `keystore.properties` at `android/keystore.properties` (both are ignored
+by git and must never be committed), then run `./gradlew assembleRelease`. The
+APK in `dist/` is signed with a certificate whose SHA-256 fingerprint is
+`36:A6:DE:2C:76:F5:74:43:4C:FE:01:7A:3C:B7:BE:9A:A8:21:3C:E5:6F:1A:6B:3E:BB:03:96:6D:92:18:95:3E`.
+
 The original README follows.
 
 [lichess.org/mobile](http://lichess.org/mobile)
