@@ -42,6 +42,8 @@ export interface Player {
 
 export interface Puzzle {
   readonly id: number
+  // the 5 characters id used by the current lichess.org puzzle endpoints
+  readonly realId?: string
   readonly rating: number
   readonly attempts: number
   readonly fen: string

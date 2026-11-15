@@ -4,18 +4,12 @@
 	"bundledWebRuntime": false,
 	"webDir": "www",
 	"backgroundColor": "000000ff",
-	"appendUserAgent": "Lichobile/7.15.2",
+	"appendUserAgent": "Lichobile/7.15.2-og",
 	"plugins": {
 		"SplashScreen": {
 			"androidSplashResourceName": "launch_splash",
 			"launchAutoHide": false,
 			"useDialog": false
-		},
-		"PushNotifications": {
-			"presentationOptions": [
-				"sound",
-				"alert"
-			]
 		}
 	},
 	"ios": {

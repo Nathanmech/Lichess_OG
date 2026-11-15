@@ -125,12 +125,12 @@ function tournamentCreatorInfo(data: Tournament, startsAt: string) {
 
 function tournamentPositionInfo(position: Opening) {
   return (
-    <div className={'tournamentPositionInfo' + (position.wikiPath ? ' withLink' : '')}
-      oncreate={helper.ontapY(() => position && position.wikiPath &&
-        window.open(`https://en.wikipedia.org/wiki/${position.wikiPath}`, '_blank')
+    <div className={'tournamentPositionInfo' + (position.url ? ' withLink' : '')}
+      oncreate={helper.ontapY(() => position && position.url &&
+        window.open(position.url, '_blank')
       )}
     >
-      {position.eco + ' ' + position.name}
+      {(position.eco ? position.eco + ' ' : '') + position.name}
     </div>
   )
 }

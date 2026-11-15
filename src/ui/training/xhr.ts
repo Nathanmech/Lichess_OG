@@ -1,13 +1,38 @@
 import { fetchJSON } from '../../http'
 import { PuzzleData, PuzzleSyncData, RoundData, PuzzleOutcome } from '../../lichess/interfaces/training'
 
-export function round(outcome: PuzzleOutcome): Promise<RoundData> {
-  return fetchJSON(`/training/${outcome.id}/round2`, {
+interface CompleteData {
+  readonly round?: {
+    readonly win: boolean
+    readonly ratingDiff?: number
+    readonly vote?: boolean
+  }
+  readonly next?: {
+    readonly user?: { readonly rating: number }
+  }
+}
+
+// The endpoint this app used to send a puzzle result to was switched off by
+// lichess.org; this is the one the website uses.
+export function round(outcome: PuzzleOutcome, realId: string): Promise<RoundData> {
+  return fetchJSON<CompleteData>(`/training/complete/mix/${realId}`, {
     method: 'POST',
     body: JSON.stringify({
-      win: outcome.win
+      win: outcome.win,
+      rated: true
     })
   })
+  .then(data => ({
+    round: {
+      win: outcome.win,
+      userRatingDiff: data.round && data.round.ratingDiff || 0
+    },
+    user: data.next && data.next.user ? {
+      rating: Math.round(data.next.user.rating),
+      recent: []
+    } : undefined,
+    voted: data.round && data.round.vote !== undefined ? data.round.vote : null
+  }))
 }
 
 export function vote(id: number, v: boolean): Promise<[boolean, number]> {
@@ -35,11 +60,18 @@ export function newPuzzlesBatch(num: number, after?: number): Promise<PuzzleSync
   })
 }
 
+// lichess.org now only takes the last solution of a batch into account, so
+// they are sent one at a time
 export function solvePuzzlesBatch(outcomes: ReadonlyArray<PuzzleOutcome>): Promise<void> {
-  return fetchJSON('/training/batch', {
-    method: 'POST',
-    body: JSON.stringify({
-      solutions: outcomes
-    })
-  })
+  return outcomes.reduce(
+    (acc, outcome) => acc.then(() =>
+      fetchJSON('/training/batch', {
+        method: 'POST',
+        body: JSON.stringify({
+          solutions: [outcome]
+        })
+      })
+    ),
+    Promise.resolve()
+  )
 }

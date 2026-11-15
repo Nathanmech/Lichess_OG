@@ -228,9 +228,10 @@ export default class TournamentCtrl {
       socket.setVersion(data.socketVersion)
     }
 
-    this.teamColorMap = data.teamBattle ? this.createTeamColorMap (data.teamBattle) : {}
+    // partial reloads do not carry team battle data
+    const tb = this.tournament.teamBattle
+    this.teamColorMap = tb ? this.createTeamColorMap(tb) : {}
 
-    const tb = data.teamBattle
     if (tb && !tb.joinWith.includes(settings.tournament.join.lastTeam())) {
       if (tb.joinWith.length > 0)
         settings.tournament.join.lastTeam(tb.joinWith[0])

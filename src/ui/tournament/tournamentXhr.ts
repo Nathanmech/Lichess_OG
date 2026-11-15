@@ -1,18 +1,33 @@
 import { fetchJSON } from '../../http'
 import { Tournament, PlayerInfo, TournamentCreateResponse, TournamentLists, StandingPage } from '../../lichess/interfaces/tournament'
 
+const initialFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
 type EmptyObject = Record<string, never>
 
 export function currentTournaments(): Promise<TournamentLists> {
   return fetchJSON('/tournament', {}, true)
 }
 
+// lichess.org now sends each team as [name, flair]: keep the name
+function normalizeTeams(t: Tournament): Tournament {
+  const teams = t.teamBattle && t.teamBattle.teams as { [key: string]: unknown }
+  if (teams) {
+    Object.keys(teams).forEach(k => {
+      const v = teams[k]
+      if (Array.isArray(v)) teams[k] = v[0]
+    })
+  }
+  return t
+}
+
 export function tournament(id: string): Promise<Tournament> {
-  return fetchJSON('/tournament/' + id, {query: {socketVersion: 1, scores: 0}}, true)
+  return fetchJSON<Tournament>('/tournament/' + id, {query: {socketVersion: 1, scores: 0}}, true)
+  .then(normalizeTeams)
 }
 
 export function reload(id: string, page?: number): Promise<Tournament> {
-  return fetchJSON('/tournament/' + id,
+  return fetchJSON<Tournament>('/tournament/' + id,
   {
     method: 'GET',
     query: {
@@ -21,6 +36,7 @@ export function reload(id: string, page?: number): Promise<Tournament> {
       ...(page ? { page } : {})
     },
   })
+  .then(normalizeTeams)
 }
 
 export function loadPage(id: string, p: number): Promise<StandingPage> {
@@ -52,8 +68,10 @@ export function create(name: string, variant: string, position: string, mode: st
     body: JSON.stringify({
       name,
       variant,
-      position,
-      mode,
+      // only a custom starting position is sent; the server takes `rated`
+      // where it used to take `mode`
+      ...(position && position !== '---' && position !== initialFen ? { position } : {}),
+      rated: mode === '1',
       clockTime,
       clockIncrement,
       minutes,

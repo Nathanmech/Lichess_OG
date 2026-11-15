@@ -114,7 +114,7 @@ function formatTime(timeInMillis: number) {
 function determineTournamentType (tournament: TournamentListItem) {
   let tournamentType = ''
 
-  if (tournament.battle) {
+  if (tournament.battle || tournament.teamBattle) {
     tournamentType = 'teamBattle'
   }
   else if (tournament.createdBy !== 'lichess') {

@@ -17,6 +17,7 @@ import promotion, { Promoting } from '../shared/offlineRound/promotion'
 import { PromotingInterface } from '../shared/round'
 
 import moveTest from './moveTest'
+import { normalizeBranch } from './branch'
 import makeGround from './ground'
 import menu, { IMenuCtrl } from './menu'
 import * as xhr from './xhr'
@@ -238,6 +239,7 @@ export default class TrainingCtrl implements PromotingInterface {
     }
 
     const data = JSON.parse(JSON.stringify(cfg))
+    if (data.puzzle.branch) normalizeBranch(data.puzzle.branch)
     const variant = {
       key: 'standard' as VariantKey
     }
@@ -444,7 +446,9 @@ export default class TrainingCtrl implements PromotingInterface {
     const outcome = { id: this.data.puzzle.id, win }
 
     const roundReq = () => {
-      xhr.round(outcome)
+      const realId = this.data.puzzle.realId
+      if (!realId) return
+      xhr.round(outcome, realId)
       .then((res) => {
         this.vm.voted = res.voted
         this.data.user = res.user
