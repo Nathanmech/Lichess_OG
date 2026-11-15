@@ -133,13 +133,15 @@ export default class HomeCtrl {
         },
       })
 
-      Promise.all([
-        featuredTournamentsXhr(),
-        session.refresh().then(() => session.isKidMode() ? Promise.resolve([]) : featuredStreamersXhr()),
-      ])
-        .then(results => {
-          const [fTour, fStreamers] = results
+      featuredTournamentsXhr()
+        .then(fTour => {
           this.featuredTournaments = fTour.featured
+          redraw()
+        })
+        .catch(noop)
+
+      session.refresh().then(() => session.isKidMode() ? Promise.resolve([]) : featuredStreamersXhr())
+        .then(fStreamers => {
           this.featuredStreamers = fStreamers
           redraw()
         })

@@ -58,9 +58,6 @@
                   android:pathPrefix="/tv" />
                 <data
                   android:host="lichess.org" android:scheme="https"
-                  android:pathPrefix="/signup/confirm" />
-                <data
-                  android:host="lichess.org" android:scheme="https"
                   android:pathPrefix="/study" />
                 <data
                   android:host="lichess.org" android:scheme="https"

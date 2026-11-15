@@ -1,8 +1,8 @@
 import { SESSION_ID_KEY, fetchJSON } from '../../../http'
 import { OpeningData, TablebaseData } from './interfaces'
 
-const explorerEndpoint = 'https://explorer.lichess.ovh'
-const tablebaseEndpoint = 'https://tablebase.lichess.ovh'
+const explorerEndpoint = 'https://explorer.lichess.org'
+const tablebaseEndpoint = 'https://tablebase.lichess.org'
 
 export interface OpeningConf {
   db: string

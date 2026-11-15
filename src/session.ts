@@ -3,7 +3,7 @@ import { Device } from '@capacitor/device'
 import throttle from 'lodash-es/throttle'
 import redraw from './utils/redraw'
 import signals from './signals'
-import { SESSION_ID_KEY, fetchJSON, fetchText } from './http'
+import { SESSION_ID_KEY, fetchJSON, fetchText, RequestOpts } from './http'
 import { hasNetwork, handleXhrError, serializeQueryParameters } from './utils'
 import { getAtPath, setAtPath, pick } from './utils/object'
 import i18n from './i18n'
@@ -17,6 +17,7 @@ import challengesApi from './lichess/challenges'
 import storage from './storage'
 import asyncStorage from './asyncStorage'
 import announce, { Announcement } from './announce'
+import { normalizeProfile } from './lichess/profile'
 
 interface Prefs {
   [key: string]: PrefValue
@@ -148,6 +149,29 @@ function makeReducer(prefix: string) {
   }
 }
 
+// lichess.org no longer sends this preference to the app, yet the form that
+// saves preferences requires it. Read it from the website preference page so
+// that saving from the app does not overwrite what the user chose there.
+let insightShare: string | undefined
+function getInsightShare(): Promise<string> {
+  if (insightShare !== undefined) return Promise.resolve(insightShare)
+  return fetchText('/account/preferences/privacy', {
+    headers: {
+      'Accept': 'text/html',
+      'X-Requested-With': '__delete',
+    }
+  })
+  .then(html => {
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    const input = doc.querySelector('input[name="insightShare"][checked]')
+    const v = input && input.getAttribute('value')
+    if (v === '0' || v === '1' || v === '2') insightShare = v
+    // lichess default: share with friends
+    return insightShare || '1'
+  })
+  .catch(() => '1')
+}
+
 const savePreferences = throttle((): Promise<string> => {
 
   const prefs = session && session.prefs || {}
@@ -159,7 +183,6 @@ const savePreferences = throttle((): Promise<string> => {
     'destination',
     'coords',
     'replay',
-    'blindfold'
   ])).reduce(makeReducer('display.'), {}) as Record<string, string>
 
   const behavior = Object.entries(pick(prefs, [
@@ -169,27 +192,29 @@ const savePreferences = throttle((): Promise<string> => {
     'autoThreefold',
     'submitMove',
     'confirmResign',
-    'moretime',
   ])).reduce(makeReducer('behavior.'), {}) as Record<string, string>
 
   const rest = Object.entries(pick(prefs, [
     'clockTenths',
     'clockBar',
     'clockSound',
+    'moretime',
     'follow',
     'challenge',
     'message',
-    'insightShare'
   ])).reduce(makeReducer(''), {}) as Record<string, string>
 
-  return fetchText('/account/preferences', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'Accept': 'application/json, text/*'
-    },
-    body: serializeQueryParameters({ ...rest, ...display, ...behavior })
-  }, true)
+  return getInsightShare()
+  .then(insightShare =>
+    fetchText('/account/preferences', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Accept': 'application/json, text/*'
+      },
+      body: serializeQueryParameters({ ...rest, ...display, ...behavior, insightShare })
+    }, true)
+  )
   .then(showSavedPrefToast)
 }, 1000)
 
@@ -227,11 +252,11 @@ function login(username: string, password: string, token: string | null): Promis
   }, true)
   .then(data => {
     if (isSession(data)) {
-      session = data
+      session = { ...data, profile: normalizeProfile(data.profile) }
       if (session.sessionId) {
         storage.set(SESSION_ID_KEY, session.sessionId)
       }
-      storeSession(data)
+      storeSession(session)
       sendUUID()
       return session
     } else {
@@ -246,6 +271,7 @@ function logout(): Promise<void> {
     fetchJSON('/logout', { method: 'POST' }, true)
     .then(() => {
       session = undefined
+      insightShare = undefined
       onLogout()
       friendsApi.clear()
       redraw()
@@ -290,8 +316,41 @@ function signup(
   })
 }
 
+// lichess.org now answers /account/info with a minimal payload (id, username,
+// prefs, ongoing games). Everything else the app keeps in its session (perfs,
+// profile, kid mode...) is read from the public user endpoint.
+type AccountInfo = Pick<Session, 'id' | 'username' | 'title' | 'patron' | 'online' | 'nowPlaying' | 'prefs' | 'nbChallenges' | 'announce'>
+type AccountUser = Partial<Pick<Session, 'perfs' | 'profile' | 'createdAt' | 'seenAt' | 'playTime' | 'tosViolation' | 'kid'>>
+
+const emptyPlayTime: PlayTime = { total: 0, tv: 0 }
+
+function fetchSession(opts?: RequestOpts): Promise<Session> {
+  return fetchJSON<AccountInfo>('/account/info', opts)
+  .then(info => {
+    // what we already know about that user, in case the second request fails
+    const known: Partial<Session> = session && session.id === info.id ? session : {}
+    return fetchJSON<AccountUser>(`/api/user/${info.id}`, opts)
+    .catch(() => ({} as AccountUser))
+    .then(user => ({
+      perfs: user.perfs || known.perfs || {} as Perfs,
+      profile: normalizeProfile(user.profile) || known.profile,
+      createdAt: user.createdAt || known.createdAt || 0,
+      seenAt: user.seenAt || known.seenAt || 0,
+      playTime: user.playTime || known.playTime || emptyPlayTime,
+      tosViolation: user.perfs ? user.tosViolation : known.tosViolation,
+      kid: user.perfs ? !!user.kid : !!known.kid,
+      nbFollowers: known.nbFollowers || 0,
+      troll: known.troll,
+      playban: known.playban,
+      language: known.language,
+      ...info,
+      patron: !!info.patron,
+    }))
+  })
+}
+
 function rememberLogin(): Promise<Session> {
-  return fetchJSON<Session>('/account/info')
+  return fetchSession()
   .then(data => {
     session = data
     storeSession(data)
@@ -301,7 +360,7 @@ function rememberLogin(): Promise<Session> {
 
 async function refresh(): Promise<void> {
   try {
-    const data = await fetchJSON<Session>('/account/info', { cache: 'reload' })
+    const data = await fetchSession({ cache: 'reload' })
     session = data
     storeSession(data)
     announce.set(data.announce)
@@ -322,7 +381,7 @@ async function refresh(): Promise<void> {
 
 async function backgroundRefresh(): Promise<void> {
   if (hasNetwork() && isConnected()) {
-    const data = await fetchJSON<Session>('/account/info')
+    const data = await fetchSession()
     session = data
     storeSession(data)
     announce.set(data.announce)

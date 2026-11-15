@@ -11,7 +11,7 @@ export function saveForecasts(
   forecasts: ForecastStep[][]
 ): Promise<SaveResponse> {
   return fetchJSON(
-    `/${gameId}${playerId}/forecasts`,
+    `/game/${gameId}${playerId}/forecasts`,
     {
       method: 'POST',
       body: JSON.stringify(forecasts),
@@ -26,7 +26,7 @@ export function playAndSaveForecasts(
   forecasts: ForecastStep[][],
 ): Promise<SaveResponse> {
   return fetchJSON(
-    `/${gameId}${playerId}/forecasts/${moveToPlay.uci}`,
+    `/game/${gameId}${playerId}/forecasts/${moveToPlay.uci}`,
     {
       method: 'POST',
       body: JSON.stringify(forecasts),

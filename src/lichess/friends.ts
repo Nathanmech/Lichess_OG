@@ -21,31 +21,39 @@ export default {
       const id = name.toLowerCase()
       const playing = playings.includes(id)
       const patron = patrons.includes(id)
-      onlineFriends.set(friend, { name, title, playing, patron })
+      onlineFriends.set(id, { name, title, playing, patron })
     })
   },
   set(rawName: string, playing: boolean, patron: boolean): void {
     const [name, title] = parseFriend(rawName)
-    onlineFriends.set(rawName, { name, title, playing, patron })
+    onlineFriends.set(name.toLowerCase(), { name, title, playing, patron })
   },
+  // lichess.org identifies friends by title + name when they come online, and
+  // by user id afterwards: always key by user id
   playing(rawName: string): void {
-    const friend = onlineFriends.get(rawName)
+    const id = friendId(rawName)
+    const friend = onlineFriends.get(id)
     if (friend) {
-      onlineFriends.set(rawName, { ...friend, playing: true })
+      onlineFriends.set(id, { ...friend, playing: true })
     }
   },
   stoppedPlaying(rawName: string): void {
-    const friend = onlineFriends.get(rawName)
+    const id = friendId(rawName)
+    const friend = onlineFriends.get(id)
     if (friend) {
-      onlineFriends.set(rawName, { ...friend, playing: false })
+      onlineFriends.set(id, { ...friend, playing: false })
     }
   },
   remove(leaving: string): void {
-    onlineFriends.delete(leaving)
+    onlineFriends.delete(friendId(leaving))
   },
   clear(): void {
     onlineFriends.clear()
   },
+}
+
+function friendId(rawName: string): string {
+  return parseFriend(rawName)[0].toLowerCase()
 }
 
 function parseFriend(friend: string): [string, string | undefined] {

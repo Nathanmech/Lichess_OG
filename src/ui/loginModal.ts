@@ -12,7 +12,8 @@ import * as helper from './helper'
 import i18n from '../i18n'
 import router from '../router'
 import { closeIcon } from './shared/icons'
-import signupModal from './signupModal'
+import globalConfig from '../config'
+import { openExternalBrowser } from '../utils/browse'
 
 let isOpen = false
 let loading = false
@@ -79,7 +80,8 @@ export default {
         ]),
         h('div.loginActions', [
           h('a', {
-            oncreate: helper.ontap(signupModal.open)
+            // lichess.org refuses sign-ups coming from this app: use the website
+            oncreate: helper.ontap(() => openExternalBrowser(globalConfig.apiEndPoint + '/signup'))
           }, [i18n('signUp')]),
           h('a', {
             href: 'https://lichess.org/password/reset'

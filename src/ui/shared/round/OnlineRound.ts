@@ -327,7 +327,7 @@ export default class OnlineRound implements OnlineRoundInterface {
 
   public isClockRunning(): boolean {
     return !!this.data.clock && gameApi.playable(this.data) &&
-      ((this.data.game.turns - this.data.game.startedAtTurn) > 1 || this.data.clock.running)
+      ((this.data.game.turns - (this.data.game.startedAtTurn || 0)) > 1 || this.data.clock.running)
   }
 
   public sendMove(orig: Key, dest: Key, prom?: Role, isPremove = false) {

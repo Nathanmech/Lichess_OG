@@ -24,12 +24,12 @@ export function getPGN(gameId: string, raw = false) {
 }
 
 export function readNote(gameId: string) {
-  return fetchText(`/${gameId}/note`)
+  return fetchText(`/game/${gameId}/note`)
 }
 
 export function syncNote(gameId: string, notes: string) {
 
-  return fetchText(`/${gameId}/note`, {
+  return fetchText(`/game/${gameId}/note`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',

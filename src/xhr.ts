@@ -170,7 +170,8 @@ export function miniUser(userId: string): Promise<MiniUser> {
 }
 
 export function timeline(): Promise<TimelineData> {
-  return fetchJSON('/timeline', undefined, false)
+  // '/timeline' now only answers with an advert for the new official app
+  return fetchJSON('/api/timeline', { query: { nb: 15 } }, false)
 }
 
 export function status(): Promise<void> {

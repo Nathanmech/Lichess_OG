@@ -3,7 +3,7 @@ import settings from '../../settings'
 import globalConfig from '../../config'
 import redraw from '../../utils/redraw'
 import { serializeQueryParameters, handleXhrError, prop, Prop } from '../../utils'
-import { fetchJSON } from '../../http'
+import { fetchJSON, fetchText } from '../../http'
 import { OnlineGameData } from '../../lichess/interfaces/game'
 
 export interface IImporterCtrl {
@@ -34,8 +34,13 @@ export default function ImporterCtrl(): IImporterCtrl {
     importGame(pgn: string) {
       importing(true)
       redraw()
-      submitOnline(pgn, settings.importer.analyse())
+      const analyse = settings.importer.analyse()
+      submitOnline(pgn, analyse)
       .then(data => {
+        // the import endpoint no longer starts the computer analysis itself
+        if (analyse && data.game && data.game.id) {
+          fetchText(`/${data.game.id}/request-analysis`, { method: 'POST' }).catch(() => {})
+        }
         router.set(`/analyse/online${data.url.round}`)
       })
       .catch(err => {

@@ -196,6 +196,11 @@ export default class StrongSocket {
   }
 
   private handle(m: MsgIn) {
+    // lichess.org may now group several events in a single message
+    if (m.t === 'batch' && Array.isArray(m.d)) {
+      m.d.forEach((e: MsgIn) => this.handle(e))
+      return
+    }
     if (m.v && this.version !== undefined) {
       if (m.v <= this.version) {
         this.debug('already has event ' + m.v)

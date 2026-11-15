@@ -32,7 +32,8 @@ export default class TeamsListCtrl {
         this.myTeams = data
         redraw()
       })
-      .catch(utils.handleXhrError)
+      // that endpoint now requires an OAuth token the app does not have
+      .catch(() => {})
     }
   }
 
