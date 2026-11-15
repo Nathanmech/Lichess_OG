@@ -1,3 +1,33 @@
+Lichess OG: lichobile 7.15.2, kept working
+==========================================
+
+This is the old lichess.org mobile app ([lichobile](https://github.com/lichess-org/lichobile))
+at version 7.15.2, with only the changes needed for it to keep working against
+today's lichess.org server ([lila](https://github.com/lichess-org/lila)). It is
+not an official lichess.org app. License: GPL-3.0-or-later, same as upstream.
+
+What differs from 7.15.2:
+
+* Server calls that lichess.org removed, moved or switched off for this app are
+  pointed at their current equivalents (puzzles, timeline, streamers, player
+  search, analysis, forecasts, notes, opening explorer, preferences, follow /
+  block, tournaments). Screens are unchanged.
+* No push notifications: they need Firebase credentials owned by lichess.org.
+* Sign-up opens the lichess.org website: the server refuses sign-ups from this app.
+* The "please upgrade" pop-up is gone.
+* Android application id is `org.lichess.mobileapp.og`, so it installs next to
+  the official apps. Minimum Android version is 5.1.
+
+Build the Android APK (Node 22, JDK 17, Android SDK 30 + NDK 23.1.7779620):
+
+    npm ci
+    APP_MODE=release APP_CONFIG=prod npm run build
+    npx cap sync android
+    (cd node_modules/capacitor-stockfish/stockfish/src && make net)
+    (cd android && ./gradlew assembleDebug)
+
+The original README follows.
+
 [lichess.org/mobile](http://lichess.org/mobile)
 --------------------
 
