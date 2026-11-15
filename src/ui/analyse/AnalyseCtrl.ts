@@ -24,7 +24,6 @@ import { playerName as gamePlayerName } from '../../lichess/player'
 import * as gameApi from '../../lichess/game'
 import { AnalyseData, AnalyseDataWithTree, isOnlineAnalyseData } from '../../lichess/interfaces/analyse'
 import { Study, findTag } from '../../lichess/interfaces/study'
-import { Opening } from '../../lichess/interfaces/game'
 import promotion, { Promoting } from '../shared/offlineRound/promotion'
 import continuePopup, { Controller as ContinuePopupController } from '../shared/continuePopup'
 import { NotesCtrl } from '../shared/round/notes'
@@ -36,6 +35,7 @@ import RetroCtrl, { IRetroCtrl } from './retrospect/RetroCtrl'
 import { make as makePractice, PracticeCtrl } from './practice/practiceCtrl'
 import crazyValid from './crazy/crazyValid'
 import ExplorerCtrl from './explorer/ExplorerCtrl'
+import { openingNameXhr } from './explorer/explorerXhr'
 import { IExplorerCtrl } from './explorer/interfaces'
 import analyseMenu, { IMainMenuCtrl } from './menu'
 import analyseSettings, { ISettingsCtrl } from './analyseSettings'
@@ -770,20 +770,19 @@ export default class AnalyseCtrl implements PromotingInterface {
       this.node.ply <= 20 && this.node.ply > 0 &&
       openingSensibleVariants.has(this.data.game.variant.key)
     ) {
-      const msg: { fen: string, path: string, variant?: VariantKey } = {
-        fen: this.node.fen,
-        path: this.path
-      }
+      const path = this.path
+      const fen = this.node.fen
       const variant = this.data.game.variant.key
-      if (variant !== 'standard') msg.variant = variant
       this.tree.updateAt(this.path, (node: Tree.Node) => {
         // flag opening as null in any case to not request twice
         node.opening = null
-        this.socket.ask<{ opening: Opening, path: string }>('opening', 'opening', msg)
-        .then(d => {
-          if (d.opening && d.path) {
-            node.opening = d.opening
-            if (d.path === this.path) redraw()
+        // lichess.org sockets no longer answer opening requests: the opening
+        // explorer knows the opening of a position
+        openingNameXhr(variant, fen)
+        .then(opening => {
+          if (opening) {
+            node.opening = opening
+            if (path === this.path) redraw()
           }
         })
         .catch(noop)

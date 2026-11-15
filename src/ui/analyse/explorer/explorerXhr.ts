@@ -45,3 +45,16 @@ export function tablebaseXhr(variant: VariantKey, fen: string, timeout?: number)
     timeout
   })
 }
+
+export function openingNameXhr(variant: VariantKey, fen: string): Promise<{ eco: string, name: string } | undefined> {
+  return fetchJSON<{ opening?: { eco: string, name: string } | null }>(explorerEndpoint + '/lichess', {
+    headers: {
+      'Accept': 'application/json',
+      'X-Requested-With': '__delete',
+      [SESSION_ID_KEY]: '__delete',
+    },
+    credentials: 'omit',
+    query: { fen, variant, moves: 0, topGames: 0, recentGames: 0 }
+  })
+  .then(data => data.opening || undefined)
+}
