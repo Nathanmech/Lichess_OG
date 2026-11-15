@@ -17,7 +17,7 @@ export interface MoveStats {
   san: San
 }
 
-export type TablebaseCategory = 'loss' | 'unknown' | 'maybe-loss' | 'blessed-loss' | 'draw' | 'cursed-win' | 'maybe-win' | 'win'
+export type TablebaseCategory = 'loss' | 'unknown' | 'maybe-loss' | 'syzygy-loss' | 'blessed-loss' | 'draw' | 'cursed-win' | 'maybe-win' | 'syzygy-win' | 'win'
 
 export interface OpeningMoveStats extends MoveStats {
   white: number

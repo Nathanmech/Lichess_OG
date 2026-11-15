@@ -126,11 +126,11 @@ function show(ctrl: AnalyseCtrl) {
         <div className="explorer-data">
           {showTablebase(ctrl, i18n('winning'), moves.filter((move) => move.category === 'loss'), data.fen)}
           {showTablebase(ctrl, i18n('unknown'), moves.filter((move) => move.category === 'unknown'), data.fen)}
-          {showTablebase(ctrl, i18n('winOr50MovesByPriorMistake'), moves.filter((move) => move.category === 'maybe-loss'), data.fen)}
+          {showTablebase(ctrl, i18n('winOr50MovesByPriorMistake'), moves.filter((move) => move.category === 'maybe-loss' || move.category === 'syzygy-loss'), data.fen)}
           {showTablebase(ctrl, i18n('winPreventedBy50MoveRule'), moves.filter((move) => move.category === 'blessed-loss'), data.fen)}
           {showTablebase(ctrl, i18n('drawn'), moves.filter((move) => move.category === 'draw'), data.fen)}
           {showTablebase(ctrl, i18n('lossSavedBy50MoveRule'), moves.filter((move) => move.category === 'cursed-win'), data.fen)}
-          {showTablebase(ctrl, i18n('lossOr50MovesByPriorMistake'), moves.filter((move) => move.category === 'maybe-win'), data.fen)}
+          {showTablebase(ctrl, i18n('lossOr50MovesByPriorMistake'), moves.filter((move) => move.category === 'maybe-win' || move.category === 'syzygy-win'), data.fen)}
           {showTablebase(ctrl, i18n('losing'), moves.filter((move) => move.category === 'win'), data.fen)}
         </div>
       )

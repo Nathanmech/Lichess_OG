@@ -88,7 +88,7 @@ function renderProfile(user: ProfileUser): Mithril.Child {
             {location}
             {country != null && hasNetwork() ?
             <span className="country">
-              {location != null ? ',' : ''} <img className="flag" src={lichessAssetSrc(`images/flags/${user.profile.country}.png`)} />
+              {location != null ? ',' : ''} <img className="flag" src={lichessAssetSrc(`flags/${user.profile.country}.webp`)} />
               {country}
             </span> : null
             }

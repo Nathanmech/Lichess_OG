@@ -61,7 +61,7 @@ function content(mini: MiniUser, player: Player, opponent: Player, score?: Score
         </div>
         { user.profile && user.profile.country ?
           <p className="country">
-            <img className="flag" src={utils.lichessAssetSrc('images/flags/' + user.profile.country + '.png')} />
+            <img className="flag" src={utils.lichessAssetSrc('flags/' + user.profile.country + '.webp')} />
             {countries[user.profile.country]}
           </p> : null
         }

@@ -6,8 +6,8 @@ export function colorOf(fen: Fen): Color {
 }
 
 export function winnerBeforeMove(stm: Color, category: TablebaseCategory): Color | undefined {
-  if (category === 'loss' || category === 'maybe-loss' || category === 'blessed-loss')
+  if (category === 'loss' || category === 'maybe-loss' || category === 'syzygy-loss' || category === 'blessed-loss')
     return stm
-  if (category === 'win' || category === 'maybe-win' || category === 'cursed-win')
+  if (category === 'win' || category === 'maybe-win' || category === 'syzygy-win' || category === 'cursed-win')
     return oppositeColor(stm)
 }
