@@ -3,12 +3,14 @@
     <item
         android:drawable="@color/black"
         android:gravity="fill" />
+
     <item
         android:bottom="200dp"
         android:left="200dp"
         android:right="200dp"
-        android:top="200dp"
-        android:gravity="center"
-        android:drawable="@drawable/vector_logo">
+        android:top="200dp">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/logo" />
     </item>
 </layer-list>
