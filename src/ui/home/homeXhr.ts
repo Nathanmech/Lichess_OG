@@ -1,7 +1,6 @@
 import { fetchJSON } from '../../http'
 import globalConfig from '../../config'
 import { Streamer } from '../../lichess/interfaces'
-import { PuzzleData } from '../../lichess/interfaces/training'
 import { TournamentListItem } from '../../lichess/interfaces/tournament'
 
 interface FeaturedTournamentData {
@@ -26,9 +25,7 @@ export function featuredStreamers(): Promise<readonly Streamer[]> {
   })))
 }
 
-export function dailyPuzzle(): Promise<PuzzleData> {
-  return fetchJSON('/training/daily', undefined)
-}
+export { dailyPuzzle } from '../training/xhr'
 
 export function featuredTournaments(): Promise<FeaturedTournamentData> {
   return fetchJSON('/tournament/featured', undefined)

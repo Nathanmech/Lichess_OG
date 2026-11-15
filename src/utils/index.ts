@@ -312,6 +312,22 @@ export function base62ToNumber(id?: string): number | undefined {
   }, 0)
 }
 
+function intToChar(i: number) {
+  if (i < 26) return String.fromCharCode(i + 65)
+  else if (i < 52) return String.fromCharCode(i + 71)
+  return String.fromCharCode(i - 4)
+}
+
+// inverse of base62ToNumber, for lichess.org puzzle ids (5 characters)
+export function numberToBase62(n: number, size = 5): string {
+  let id = ''
+  for (let i = 0; i < size || n > 0; i++) {
+    id += intToChar(n % 62)
+    n = Math.floor(n / 62)
+  }
+  return id
+}
+
 export function hashCode(str: string): number {
   let hash = 0
   for (let i = 0; i < str.length; i++) {

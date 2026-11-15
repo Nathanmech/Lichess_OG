@@ -33,6 +33,9 @@ const checks = [
   ['/tournament/featured', has('featured')],
   ['/api/streamer/live', has('length')],
   ['/training/daily', has('puzzle.id', 'puzzle.realId', 'puzzle.lines', 'puzzle.branch.uci', 'puzzle.initialPly', 'game.treeParts.fen')],
+  // public puzzle API, used when the former mobile endpoints fail
+  ['/api/puzzle/daily', has('puzzle.id', 'puzzle.solution.0', 'puzzle.initialPly', 'game.pgn')],
+  ['/api/puzzle/batch/mix?nb=1', has('puzzles.0.puzzle.id', 'puzzles.0.puzzle.solution.0', 'puzzles.0.game.pgn')],
   ['/player', has('bullet.0.username')],
   ['/player/online?nb=5', has('0.username', '0.perfs')],
   [`/api/user/${user}`, has('id', 'username', 'perfs', 'count.all', 'createdAt')],
