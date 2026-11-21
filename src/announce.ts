@@ -25,8 +25,18 @@ export function get(): Announcement | undefined {
   return announce
 }
 
+// Server alerts that advertise the new official app ("Upgrade now!
+// lichess.org/app") are discarded: other alerts, such as a server restart,
+// are still shown.
+function isAppAdvert(a: Announcement): boolean {
+  return typeof a.msg === 'string' && a.msg.toLowerCase().includes('lichess.org/app')
+}
+
 export async function set(a?: Announcement): Promise<void> {
   if (a) {
+    if (isAppAdvert(a)) {
+      return
+    }
     const newKey = keyOf(a)
     const existing = await asyncStorage.get<string[]>(STORAGE_KEY)
     if (existing?.includes(newKey)) {
